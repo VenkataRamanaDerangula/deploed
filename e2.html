@@ -54,7 +54,7 @@
 
     .butt {
       margin-left: 20px;
-      background-color: #405cf5;
+      background-color:#0381fe;
       color: #fff;
       padding: 10px;
       border: none;
@@ -64,6 +64,12 @@
     button {
       margin-right: 5px;
       padding: 5px 10px;
+      background-color: #0381fe;
+      background-color:#0381fe;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      border-radius: 5px
     }
 
     .charts {
@@ -295,7 +301,7 @@
 
       return (
         <div>
-          <h1>Employee Manager</h1>
+          <h1>Employee Management System</h1>
           <div>
             <input
               type="text"
@@ -306,7 +312,7 @@
             <button onClick={toggleDarkMode}>
               {darkMode ? "Light Mode" : "Dark Mode"}
             </button>
-            <button onClick={handleLogout}>Logout</button>
+            <button  onClick={handleLogout}>Logout</button>
           </div>
 
           <div className="inputF">
@@ -358,7 +364,7 @@
               }
             />
             <button onClick={handleSubmit} className="butt">
-              {isEdit ? "Update" : "Add"}
+              {isEdit ? "Update Employee" : "Add Empolyee"}
             </button>
           </div>
 

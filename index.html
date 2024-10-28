@@ -1,68 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Employee Management</title>
-    <script
-      src="https://unpkg.com/react@17/umd/react.development.js"
-      crossorigin
-    ></script>
-    <script
-      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
-      crossorigin
-    ></script>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-database.js"></script>
 
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f4;
-      }
-      #root {
-        font-family: "Jost", sans-serif;
-        max-width: 500px;
-        margin: auto;
-        margin-top: 100px;
-        padding: 20px;
-        background-color: #fff;
-        box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
-        border-radius: 10px;
-      }
-      h1,
-      h2 {
-        text-align: center;
-      }
-      form {
-        display: flex;
-        flex-direction: column;
-        max-width: 400px;
-        margin: auto;
-      }
-      input,
-      button {
-        margin: 10px 0;
-        padding: 10px;
-      }
-      .error {
-        color: red;
-      }
-      form{
-        padding-bottom: 200px;
-      }
-
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Afacad Flux", sans-serif;
+        }
+        body {
+            background-color: #f2f2f2;
+            padding-top: 80px;
+        }
+        .container {
+            max-width: 1350px;
+            margin: auto;
+            padding: 0 20px;
+        }
+        nav {
+            background-color: #ffffff;
+            padding: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 600px;
+        }
+        .form-background {
+            background-color: #fcfcfc;
+            max-width: 500px;
+            border-radius: 20px;
+            margin: 40px auto;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .heading h2 {
+            margin-bottom: 20px;
+            font-weight: normal;
+            text-align: center;
+        }
+        .input-group {
+            margin-top: 15px;
+        }
+        .input-group input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #999;
+            padding: 10px 0;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            outline: none;
+            color: #0381fe;
+            font-weight: bold;
+        }
+        button {
+            width: 80%; /* Reduced width */
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .primary-btn {
+            background-color: #0381fe;
+            color: white;
+            font-weight: bold;
+        }
+        .secondary-btn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .form__group {
+            position: relative;
+            width: 100%;
+        }
+        .form__field {
+            font-family: inherit;
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 10px 0;
+            transition: border-color 0.2s;
+        }
+        .form__field::placeholder {
+            color: transparent;
+        }
+        .form__field:placeholder-shown ~ .form__label {
+            cursor: text;
+            top: 20px;
+            color: #999;
+        }
+        .form__label {
+            position: absolute;
+            display: block;
+            transition: 0.2s;
+            font-size: 16px;
+            color: #999;
+            top: 0;
+        }
+        .form__field:focus ~ .form__label,
+        .form__field:not(:placeholder-shown) ~ .form__label {
+            top: -2px;
+            font-size: 14px;
+            color: #0381fe;
+        }
+        .form__field:focus {
+            border-bottom: 2px solid #0381fe;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="logo">
+            <h1>Employee Management App</h1>
+        </div>
+    </nav>
+
     <div id="root"></div>
 
     <script type="text/babel">
-       const firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyBRby4KFveW7Q1hjOha4e-DZ5JcVDx_-qs",
             authDomain: "react-2024-8da79.firebaseapp.com",
             databaseURL: "https://react-2024-8da79-default-rtdb.firebaseio.com",
@@ -71,80 +151,97 @@
             messagingSenderId: "104759343758",
             appId: "1:104759343758:web:23188b9c363897f93da7df"
         };
-      firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
 
-      function App() {
-        const [email, setEmail] = React.useState("");
-        const [password, setPassword] = React.useState("");
-        const [error, setError] = React.useState("");
+        function App() {
+            const [email, setEmail] = React.useState("");
+            const [password, setPassword] = React.useState("");
+            const [error, setError] = React.useState("");
 
-        const redirectToDashboard = () => {
-          window.location.href = "e2.html";
-        };
+            const redirectToDashboard = () => {
+                window.location.href = "e2.html";
+            };
 
-        const handleSignup = () => {
-          firebase
-            .auth()
-            .createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-              redirectToDashboard();
-            })
-            .catch((error) => setError(error.message));
-        };
+            const handleSignup = () => {
+                firebase
+                    .auth()
+                    .createUserWithEmailAndPassword(email, password)
+                    .then(() => {
+                        redirectToDashboard();
+                    })
+                    .catch((error) => alert("Signup failed: " + error.message));
+            };
 
-        const handleLogin = () => {
-          firebase
-            .auth()
-            .signInWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-              redirectToDashboard();
-            })
-            .catch((error) => setError(error.message));
-        };
+            const handleLogin = () => {
+                firebase
+                    .auth()
+                    .signInWithEmailAndPassword(email, password)
+                    .then(() => {
+                        redirectToDashboard();
+                    })
+                    .catch((error) => alert("Login failed: " + error.message));
+            };
 
-        const handleGoogleLogin = () => {
-          const provider = new firebase.auth.GoogleAuthProvider();
-          firebase
-            .auth()
-            .signInWithPopup(provider)
-            .then((result) => {
-              redirectToDashboard();
-            })
-            .catch((error) => setError(error.message));
-        };
+            const handleGoogleLogin = () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                firebase
+                    .auth()
+                    .signInWithPopup(provider)
+                    .then(() => {
+                        redirectToDashboard();
+                    })
+                    .catch((error) => alert("Google Login failed: " + error.message));
+            };
 
-        return (
-          <div>
-            <h2>Login / Signup</h2>
-            <form>
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button type="button" onClick={handleSignup}>
-                Sign Up
-              </button>
-              <button type="button" onClick={handleLogin}>
-                Login
-              </button>
-              <button type="button" onClick={handleGoogleLogin}>
-                Login with Google
-              </button>
-              {error && <p className="error">{error}</p>}
-            </form>
-          </div>
-        );
-      }
+            return (
+                <div>
+                    <div className="form-background">
+                        <div className="heading">
+                            <h2>Sign In / Sign Up</h2>
+                        </div>
+                        <form>
+                            <div className="input-group">
+                                <div className="form__group">
+                                    <input
+                                        className="form__field"
+                                        type="email"
+                                        placeholder=" "
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
+                                    <label className="form__label">Email</label>
+                                </div>
+                            </div>
+                            <div className="input-group">
+                                <div className="form__group">
+                                    <input
+                                        className="form__field"
+                                        type="password"
+                                        placeholder=" "
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                    <label className="form__label">Password</label>
+                                </div>
+                            </div>
+                            <button type="button" className="primary-btn" onClick={handleSignup}>
+                                Sign Up
+                            </button>
+                            <button type="button" className="primary-btn" onClick={handleLogin}>
+                                Sign In
+                            </button>
+                            <button type="button" className="secondary-btn" onClick={handleGoogleLogin}>
+                                Sign In with Google
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
 
-      ReactDOM.render(<App />, document.getElementById("root"));
+        ReactDOM.render(<App />, document.getElementById("root"));
     </script>
-  </body>
+</body>
 </html>
