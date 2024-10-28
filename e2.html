@@ -1,0 +1,419 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employees Data</title>
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-database.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    #root {
+      max-width: 1300px;
+      margin: auto;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background-color: white;
+      color: black;
+      transition: all 0.3s ease;
+    }
+
+    .dark-mode {
+      background-color: #121212;
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    .dark-mode th {
+      background-color: #333;
+    }
+
+    .inputF {
+      margin-bottom: 20px;
+    }
+
+    .butt {
+      margin-left: 20px;
+      background-color: #405cf5;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button {
+      margin-right: 5px;
+      padding: 5px 10px;
+    }
+
+    .charts {
+      margin-top: 70px;
+      width: 300px;
+      display: flex;
+      justify-content: space-between;
+      gap: 80px;
+      display: flex;
+      flex-direction: column;
+      
+    }
+
+    canvas {
+      width: 45%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyBRby4KFveW7Q1hjOha4e-DZ5JcVDx_-qs",
+      authDomain: "react-2024-8da79.firebaseapp.com",
+      databaseURL: "https://react-2024-8da79-default-rtdb.firebaseio.com",
+      projectId: "react-2024-8da79",
+      storageBucket: "react-2024-8da79.appspot.com",
+      messagingSenderId: "104759343758",
+      appId: "1:104759343758:web:23188b9c363897f93da7df",
+    };
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
+
+  <script type="text/babel">
+    firebase.initializeApp({
+      apiKey: "AIzaSyBRby4KFveW7Q1hjOha4e-DZ5JcVDx_-qs",
+      authDomain: "react-2024-8da79.firebaseapp.com",
+      databaseURL: "https://react-2024-8da79-default-rtdb.firebaseio.com",
+      projectId: "react-2024-8da79",
+      storageBucket: "react-2024-8da79.appspot.com",
+      messagingSenderId: "104759343758",
+      appId: "1:104759343758:web:23188b9c363897f93da7df",
+    });
+
+    function App() {
+      const [employees, setEmployees] = React.useState([]);
+      const [filteredEmployees, setFilteredEmployees] = React.useState([]);
+      const [currentPage, setCurrentPage] = React.useState(1);
+      const [employeeForm, setEmployeeForm] = React.useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        salary: "",
+        date: "",
+        department: "",
+        id: null,
+      });
+      const [isEdit, setIsEdit] = React.useState(false);
+      const [searchQuery, setSearchQuery] = React.useState("");
+      const [darkMode, setDarkMode] = React.useState(false);
+
+      const pageSize = 5;
+
+      React.useEffect(() => {
+        fetchEmployees();
+      }, []);
+
+      const fetchEmployees = () => {
+        firebase
+          .database()
+          .ref("employees")
+          .get()
+          .then((snapshot) => {
+            if (snapshot.exists()) {
+              const data = snapshot.val();
+              const employeesList = Object.keys(data).map((key) => ({
+                id: key,
+                ...data[key],
+              }));
+              setEmployees(employeesList);
+              setFilteredEmployees(employeesList);
+              renderCharts(employeesList);
+            } else {
+              setEmployees([]);
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching data: ", error);
+          });
+      };
+
+      const handleSubmit = () => {
+        if (isEdit) {
+          firebase
+            .database()
+            .ref(`employees/${employeeForm.id}`)
+            .set(employeeForm)
+            .then(() => {
+              alert("Employee updated successfully!");
+              fetchEmployees();
+            });
+        } else {
+          const newEmployeeRef = firebase.database().ref("employees").push();
+          newEmployeeRef.set({ ...employeeForm }).then(() => {
+            alert("Employee added successfully!");
+            fetchEmployees();
+          });
+        }
+        clearForm();
+      };
+
+      const handleDelete = (id) => {
+        firebase
+          .database()
+          .ref(`employees/${id}`)
+          .remove()
+          .then(() => {
+            alert("Employee deleted successfully!");
+            fetchEmployees();
+          });
+      };
+
+      const handleEdit = (employee) => {
+        setEmployeeForm(employee);
+        setIsEdit(true);
+      };
+
+      const clearForm = () => {
+        setEmployeeForm({
+          firstName: "",
+          lastName: "",
+          email: "",
+          salary: "",
+          date: "",
+          department: "",
+          id: null,
+        });
+        setIsEdit(false);
+      };
+
+      const handleSearch = (query) => {
+        setSearchQuery(query);
+        const filtered = employees.filter((emp) =>
+          emp.firstName.toLowerCase().includes(query.toLowerCase())
+        );
+        setFilteredEmployees(filtered);
+      };
+
+      const toggleDarkMode = () => {
+        setDarkMode((prevMode) => !prevMode);
+      };
+
+      const handleLogout = () => {
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
+
+
+        window.location.href = './index.html';
+      };
+
+
+      const indexOfLastEmployee = currentPage * pageSize;
+      const indexOfFirstEmployee = indexOfLastEmployee - pageSize;
+      const currentEmployees = filteredEmployees.slice(
+        indexOfFirstEmployee,
+        indexOfLastEmployee
+      );
+
+      const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+      };
+
+      React.useEffect(() => {
+        if (darkMode) {
+          document.body.classList.add("dark-mode");
+        } else {
+          document.body.classList.remove("dark-mode");
+        }
+      }, [darkMode]);
+
+      const renderCharts = (employeesList) => {
+        const departments = {};
+        const salaryData = [];
+        const labels = [];
+
+        employeesList.forEach((employee) => {
+          departments[employee.department] = departments[employee.department]
+            ? departments[employee.department] + 1
+            : 1;
+
+          salaryData.push(parseFloat(employee.salary));
+          labels.push(employee.firstName);
+        });
+
+        new Chart(document.getElementById("departmentChart"), {
+          type: "bar",
+          data: {
+            labels: Object.keys(departments),
+            datasets: [
+              {
+                label: "Employees by Department",
+                data: Object.values(departments),
+                backgroundColor: "#36A2EB",
+              },
+            ],
+          },
+        });
+
+        new Chart(document.getElementById("salaryChart"), {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Employee Salary Distribution",
+                data: salaryData,
+                borderColor: "#FF6384",
+                fill: false,
+              },
+            ],
+          },
+        });
+      };
+
+      return (
+        <div>
+          <h1>Employee Manager</h1>
+          <div>
+            <input
+              type="text"
+              placeholder="Search by first name"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+            />
+            <button onClick={toggleDarkMode}>
+              {darkMode ? "Light Mode" : "Dark Mode"}
+            </button>
+            <button onClick={handleLogout}>Logout</button>
+          </div>
+
+          <div className="inputF">
+            <input
+              type="text"
+              placeholder="First Name"
+              value={employeeForm.firstName}
+              onChange={(e) =>
+                setEmployeeForm({ ...employeeForm, firstName: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={employeeForm.lastName}
+              onChange={(e) =>
+                setEmployeeForm({ ...employeeForm, lastName: e.target.value })
+              }
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={employeeForm.email}
+              onChange={(e) =>
+                setEmployeeForm({ ...employeeForm, email: e.target.value })
+              }
+            />
+            <input
+              type="number"
+              placeholder="Salary"
+              value={employeeForm.salary}
+              onChange={(e) =>
+                setEmployeeForm({ ...employeeForm, salary: e.target.value })
+              }
+            />
+            <input
+              type="date"
+              value={employeeForm.date}
+              onChange={(e) =>
+                setEmployeeForm({ ...employeeForm, date: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              placeholder="Department"
+              value={employeeForm.department}
+              onChange={(e) =>
+                setEmployeeForm({ ...employeeForm, department: e.target.value })
+              }
+            />
+            <button onClick={handleSubmit} className="butt">
+              {isEdit ? "Update" : "Add"}
+            </button>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Salary</th>
+                <th>Hire Date</th>
+                <th>Department</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentEmployees.map((employee) => (
+                <tr key={employee.id}>
+                  <td>{employee.firstName}</td>
+                  <td>{employee.lastName}</td>
+                  <td>{employee.email}</td>
+                  <td>{employee.salary}</td>
+                  <td>{employee.date}</td>
+                  <td>{employee.department}</td>
+                  <td>
+                    <button onClick={() => handleEdit(employee)}>Edit</button>
+                    <button onClick={() => handleDelete(employee.id)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div>
+            {[...Array(Math.ceil(filteredEmployees.length / pageSize))].map(
+              (_, index) => (
+                <button key={index} onClick={() => handlePageChange(index + 1)}>
+                  {index + 1}
+                </button>
+              )
+            )}
+          </div>
+
+          <div className="charts">
+            <canvas id="departmentChart"></canvas>
+            <canvas id="salaryChart"></canvas>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+
+</html>
